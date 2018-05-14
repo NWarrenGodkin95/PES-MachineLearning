@@ -1,5 +1,5 @@
 Use the code below to create a coloured neural network diagram (for colour bar, please see full source code for additional code).
-The colours are normalized, but a simple black and white diagram can be made too (see instructions below).
+The colours are normalized, depending on the weights of the neurons and neuron connections, but a simple black and white diagram can be made too (see instructions below).
 
 # n = layer
 # m = neuron
