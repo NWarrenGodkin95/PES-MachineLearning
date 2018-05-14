@@ -75,4 +75,4 @@ def draw_neural_net(ax, left, right, bottom, top, layer_sizes):
     plt.title('Neural Network Architecture, fontsize=30)
     draw_neural_net(ax, .1, .9, .1, .9, [1, 100, 200, 100, 50, 1]) #Change square bracket numbers for different neuron amount in each layer.
     
-    For a black and white image of the neural network diagram, remove the cmap (line 48-49). For the neurons, replace "color=cmap(norm(m)))" with color="w", ec="k" in line 56. Replace the connections colour "color=cmap(norm(o))) with color="k" in line 68.
+For a black and white image of the neural network diagram, remove the cmap (line 48-49). For the neurons, replace "color=cmap(norm(m)))" with color="w", ec="k" in line 56. Replace the connections colour "color=cmap(norm(o))) with color="k" in line 68.
