@@ -265,5 +265,5 @@ def draw_neural_net(ax, left, right, bottom, top, layer_sizes):
     plt.savefig('ModelArchitectureVisualisation'+str(iterations).zfill(4)+".png")
     plt.clf()
     
-    # Merge all visualisation images into a video
-    !ffmpeg -i MLPArchitectureVisualisation%04d.png MLPArchitectureVisualisation_compilation.mp4
+ # Merge all visualisation images into a video
+ !ffmpeg -i MLPArchitectureVisualisation%04d.png MLPArchitectureVisualisation_compilation.mp4
