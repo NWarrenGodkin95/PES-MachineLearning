@@ -1,0 +1,15 @@
+You will need these global imports for the model to fully work:
+- numpy
+- time
+- os.path
+- pandas
+- matplotlib
+- scipy.optimize
+- keras
+- csv
+- _future_
+- sklearn
+- FFMpeg
+
+Please ensure the scientific packages: NumPy, SciPy, Scikit-Learn, Pandas and Matplotlib are installed.
+FFMpeg is a command that can be used in either Jupyter Notebook or your terminal. If you are using the command in Jupyter Notebook, you will need to remove any previous videos with the same title or adjust the title before creating a video. Otherwise FFMpeg will not create the video, since you cannot override the function via the notebook.
