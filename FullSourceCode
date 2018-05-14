@@ -1,1 +1,269 @@
 
+import numpy as np
+from numpy import pi, exp, linspace, array, sqrt
+import time
+import os.path
+import pandas as pd
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import matplotlib.animation as manimation
+
+from scipy.optimize import curve_fit
+
+from __future__ import print_function
+
+import keras
+from keras import layers
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.models import load_model
+from keras.utils import plot_model
+from keras.optimizers import RMSprop
+from keras.callbacks import Callback
+
+from sklearn.model_selection import train_test_split
+
+FFMpegWriter = manimation.writers['ffmpeg']
+metadata = dict(title='Movie Test', artist='Matplotlib',
+                comment='Movie support!')
+writer = FFMpegWriter(fps=15, metadata=metadata)
+
+# Fix random seed for reproducibility
+seed = 10
+np.random.seed(seed)
+
+# Define Morse Potential Function
+r = np.arange(0.0, 60, 0.5)
+
+# Parameters
+def morse(x, De, re, alpha):
+    morse = De*((1-np.exp(-alpha*(x-re)))**2) # morse potential equation
+    return morse # Morse potential energy kJ/mol
+    
+# Morse Potential Parameters (please feel free to change the parameters for your example)
+De=100 # kJ/mol dissociation energy
+re=3 # nm equilibrium bond distance
+alpha=0.18 # 1/nm width of potential
+
+# Print Energy Values and Internuclear Separation Values
+print(morse(r,De,re,alpha)) # morse = V(r)
+plt.plot(r, morse(r,De,re,alpha), 'o')
+plt.xlabel('r (nm)', fontsize=12) # internuclear separation distance
+plt.ylabel('V(r) (kJ/mol)', fontsize=12) # morse potential energy
+plt.title('Morse Potential Dataset plot', fontsize=15)
+plt.show()
+
+# Writing to CSV file
+import csv
+data=np.transpose([r,morse(r,De,re,alpha)])
+
+with open("MorsePotentialData.csv", "w") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerows(data)
+   
+plt.plot(np.transpose(data)[0],np.transpose(data)[1])
+plt.xlabel('r (nm)', fontsize=12) # internuclear separation distance
+plt.ylabel('V(r) (kJ/mol)', fontsize=12) # morse potential energy
+plt.title('Morse Potential Dataset plot', fontsize=15)
+plt.savefig('Morse_Data_plot'".png")
+plt.show()
+
+# Neural Network Dataset Split
+# Load Potential Energy Dataset
+import time
+dataset =np.loadtxt('MorsePotentialData.csv', delimiter=',', dtype=np.float64)
+print(dataset)
+start_time = time.time()
+
+# Split into input (X ie dependent variables) and output (Y ie independent variables) variables
+X=[]
+Y=[]
+for i in range(len(dataset)):
+    X.append(dataset[i][0])
+    Y.append(dataset[i][1])
+
+X=np.asarray(X)
+Y=np.asarray(Y)
+
+# Split into test and training sets
+
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=40) # Change test/train split size, if necessary.
+
+print(X)
+print(Y) # Print both X and Y to check the values you're getting.
+
+# The data, Shuffled and Split Between Training and Test Sets
+print(x_train.shape[0], 'x_train samples')
+print(x_test.shape[0], 'x_test samples')
+print(y_train.shape[0], 'y_train samples')
+print(y_test.shape[0], 'y_test samples')
+
+# Create Model
+model = Sequential()
+model.add(Dense(1, activation='tanh', input_shape=(1,)))
+model.add(Dense(100, activation='tanh'))
+model.add(Dense(200, activation='tanh'))
+model.add(Dense(100, activation='tanh'))
+model.add(Dense(50, activation='tanh'))
+model.add(Dense(1))
+
+model.summary() # Check what your model layers and parameters look like.
+
+# Compile Model
+model.compile(loss='mse', optimizer="adam", metrics=['mean_absolute_error'])
+
+# Training a Model
+for iterations in range(1,1000):
+    model.fit(x_train, 
+              y_train, 
+              batch_size=10, 
+              epochs=1, 
+              verbose=2)
+    #predictions = model.predict(X)
+    #plt.plot(X,predictions,'o')
+    #plt.plot(r, morse(r,De,re,alpha))
+    #plt.xlabel('r (nm)', fontsize=12) # internuclear separation distance
+    #plt.ylabel('V(r) (kJ/mol)', fontsize=12) # morse potential energy
+    #plt.title('Predicted Data vs. Actual Data, Epoch Count:'+str(iterations), fontsize=15)
+    #plt.savefig('myfig'+str(iterations).zfill(4)+".png")
+    #plt.clf()
+
+# retrieve weights and biases for each NN layer
+weights, biases = model.layers[0].get_weights()
+weights, biases = model.layers[1].get_weights()
+weights, biases = model.layers[2].get_weights()
+weights, biases = model.layers[3].get_weights()
+weights, biases = model.layers[4].get_weights()
+weights, biases = model.layers[5].get_weights()
+
+# Serialize model to JSON
+model_json = model.to_json()
+with open("my_model.json", "w") as json_file:
+    json_file.write(model_json)
+    
+# Serialize weights to HDF5
+model.save_weights("my_weights_model.h5")
+print("Saved model to disk")
+
+#validation_data=(x_test, y_test)) put in model fit section for validation graphs
+
+# Scoring System
+score = model.evaluate(x_test, y_test, verbose=0)
+print("%s: %.2f" % (model.metrics_names[1], score[1]))
+print("--- %s seconds ---" % (time.time() - start_time))
+
+# Calculate Predictions
+predictions = model.predict(X)
+print(predictions)
+
+predictions = model.predict(X)
+
+# Model Plot Comparison
+plt.plot(X,predictions,'o')
+plt.plot(r, morse(r,De,re,alpha))
+plt.xlabel('r (nm)', fontsize=12) # internuclear separation distance
+plt.ylabel('V(r) (kJ/mol)', fontsize=12) # morse potential energy
+plt.title('Predicted Data vs. Actual Data', fontsize=15)
+plt.savefig('Predicted_Actual_Morse'+".png")
+plt.show()
+
+# Dataset Information
+print("Rounded type: ", type(predictions))
+print("Shape of rounded: ", len(predictions))
+print("Dataset type: ", type(dataset)) 
+print("Shape of dataset: ", dataset.shape)
+
+# Visualise Model Training (using images captured during each epoch)
+!ffmpeg -i myfig%04d.png myfig_compilation.mp4
+
+# Neural Network Layer Visualisation
+# n = layer
+# m = neuron
+# o = neuron to neuron connection line
+
+def draw_neural_net(ax, left, right, bottom, top, layer_sizes):
+    '''
+    Draw a neural network cartoon using matplotilb.
+    
+    :usage:
+        >>> fig = plt.figure(figsize=(12, 12))
+        >>> draw_neural_net(fig.gca(), .1, .9, .1, .9, [1, 2, 1])
+    
+    :parameters:
+        - ax : matplotlib.axes.AxesSubplot
+            The axes on which to plot the cartoon (get e.g. by plt.gca())
+        - left : float
+            The center of the leftmost node(s) will be placed here
+        - right : float
+            The center of the rightmost node(s) will be placed here
+        - bottom : float
+            The center of the bottommost node(s) will be placed here
+        - top : float
+            The center of the topmost node(s) will be placed here
+        - layer_sizes : list of int
+            List of layer sizes, including input and output dimensionality
+    '''
+    n_layers = len(layer_sizes)
+    v_spacing = (top - bottom)/float(max(layer_sizes))
+    h_spacing = (right - left)/float(len(layer_sizes) - 1)
+    
+    weight=[]
+    connection =[]
+    
+    # Define weights    
+    for i in range(len(model.layers)):
+        weight.append(model.layers[i].get_weights()[1]) # Input Layer Weight
+
+    for i in range(1,len(model.layers)):
+      # Don't need the first connection as this is the input vector 
+        connection.append(model.layers[i].get_weights()[0])
+    
+        print("neurons",weight)
+        print("connections",connection)
+        
+        cmap = plt.cm.winter
+        norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
+
+    # Neurons
+    for interations in range(1, 1000):
+        for n, layer_size in enumerate(layer_sizes):
+            layer_top = v_spacing*(layer_size - 1)/2. + (top + bottom)/2.
+            for m in range(layer_size):
+                circle = plt.Circle((n*h_spacing + left, layer_top - m*v_spacing), v_spacing/4., color=cmap(norm(m)))
+                ax.add_artist(circle)
+       
+    
+    # Connections
+    for iterations in range(1, 1000):
+        for n, (layer_size_a, layer_size_b) in enumerate(zip(layer_sizes[:-1], layer_sizes[1:])):
+            layer_top_a = v_spacing*(layer_size_a - 1)/2. + (top + bottom)/2.
+            layer_top_b = v_spacing*(layer_size_b - 1)/2. + (top + bottom)/2.
+            for m in range(layer_size_a):
+                for o in range(layer_size_b):
+                    line = plt.Line2D([n*h_spacing + left, (n + 1)*h_spacing + left],
+                                          [layer_top_a - m*v_spacing, layer_top_b - o*v_spacing], color=cmap(norm(o)))
+                    ax.add_artist(line)
+                    
+ for iterations in [1, 100, 250, 500, 750, 1000]: # Can change the iterations into a range e.g. in range(): if you want a more images captured instead of the 6 intervals I have chosen.
+    plt.figure(1)
+    fig = plt.figure(figsize=(20, 20)) #Change image size - will not work over 800x800.
+    ax = fig.gca()
+    ax.axis('off')
+    plt.title('Neural Network Architecture, Epoch Count:'+str(iterations), fontsize=30)
+    draw_neural_net(ax, .1, .9, .1, .9, [1, 100, 200, 100, 50, 1]) #Change square bracket numbers for different neuron amount in each layer.
+    plt.figure(2)
+    a = np.array([[-2,2]])
+    plt.figure(figsize=(20, 2.5)) # Change for larger colour bar
+    img = plt.imshow(a, cmap="winter")
+    plt.gca().set_visible(False)
+    cax = plt.axes([0.1, 0.2, 0.8, 0.6], fontsize=15)
+    Cmap = plt.colorbar(orientation="horizontal", cax=cax)
+    Cmap.set_label('Weight', fontsize=20)
+    Cmap.ax.tick_params(labelsize=15) 
+    plt.savefig('ModelArchitectureVisualisation'+str(iterations).zfill(4)+".png")
+    plt.clf()
+    
+    # Merge all visualisation images into a video
+    !ffmpeg -i MLPArchitectureVisualisation%04d.png MLPArchitectureVisualisation_compilation.mp4
