@@ -1,6 +1,8 @@
 # Machine Learning for Potential Energy Landscapes
 Master's project: Using machine learning to build a MLP model for the representation of potential energy surfaces for molecules.
 
+Special thanks to Dr David Benoit for his support and guidance during this Master's project!
+
 This repository contains source code and artifacts for my master's project.
 See the respective directories for source code, related files, and more details.
 
