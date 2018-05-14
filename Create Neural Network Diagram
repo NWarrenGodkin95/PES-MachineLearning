@@ -1,3 +1,6 @@
+Use the code below to create a coloured neural network diagram (for colour bar, please see full source code for additional code).
+The colours are normalized, but a simple black and white diagram can be made too (see instructions below).
+
 # n = layer
 # m = neuron
 # o = neuron to neuron connection line
@@ -72,4 +75,4 @@ def draw_neural_net(ax, left, right, bottom, top, layer_sizes):
     plt.title('Neural Network Architecture, fontsize=30)
     draw_neural_net(ax, .1, .9, .1, .9, [1, 100, 200, 100, 50, 1]) #Change square bracket numbers for different neuron amount in each layer.
     
-    For a black and white image of the neural network diagram, remove the cmap (line 45-46). For the neurons, replace "color=cmap(norm(m)))" with color="w", ec="k" in line 53. Replace the connections colour "color=cmap(norm(o))) with color="k" in line 65.
+    For a black and white image of the neural network diagram, remove the cmap (line 48-49). For the neurons, replace "color=cmap(norm(m)))" with color="w", ec="k" in line 56. Replace the connections colour "color=cmap(norm(o))) with color="k" in line 68.
