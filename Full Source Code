@@ -1,4 +1,4 @@
-
+# Import global imports and additional extensions for model
 import numpy as np
 from numpy import pi, exp, linspace, array, sqrt
 import time
